@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybersecurity Reviewer // Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;
+    --panel:#10161f;
+    --panel-2:#141c27;
+    --line:#1f2b38;
+    --text:#dce6ef;
+    --muted:#7c8da0;
+    --accent:#33d399;
+    --accent-dim:#1d6e54;
+    --amber:#f0b94e;
+    --red:#ff6b6b;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.55;
+  }
+  a{color:var(--accent);}
+
+  /* ---------- layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:880px){
+    .shell{grid-template-columns:1fr;}
+    .sidebar{position:relative; height:auto;}
+  }
+
+  .sidebar{
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    padding:22px 18px 30px;
+  }
+  .brand{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.06em;
+    color:var(--accent);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .brand .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 8px var(--accent);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .brand .dot{animation:none;} }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:24px;
+  }
+  nav ul{list-style:none;margin:0;padding:0;}
+  nav .nav-group{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin:18px 0 8px;
+  }
+  nav a{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    text-decoration:none;
+    color:var(--text);
+    font-size:13.5px;
+    padding:6px 8px;
+    border-radius:4px;
+    border-left:2px solid transparent;
+  }
+  nav a:hover{background:var(--panel-2); border-left-color:var(--accent);}
+  nav a .idx{font-family:var(--mono); color:var(--accent); font-size:11px; min-width:20px;}
+  .progress-card{
+    margin-top:24px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+  }
+  .progress-bar{
+    height:6px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:8px;
+  }
+  .progress-fill{
+    height:100%; width:0%; background:var(--accent); transition:width .4s ease;
+  }
+
+  .main{padding:48px 56px 100px; max-width:880px;}
+  @media (max-width:880px){ .main{padding:32px 22px 80px;} }
+
+  /* ---------- hero ---------- */
+  .hero{margin-bottom:56px;}
+  .hero .tag{
+    font-family:var(--mono); color:var(--accent); font-size:12px; letter-spacing:.1em;
+    text-transform:uppercase; margin-bottom:14px; display:block;
+  }
+  .hero h1{
+    font-family:var(--mono);
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.15;
+    margin:0 0 18px;
+    color:#fff;
+    font-weight:600;
+  }
+  .hero p{color:var(--muted); font-size:15.5px; max-width:560px; margin:0 0 22px;}
+  .terminal{
+    font-family:var(--mono);
+    background:#05080c;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+    font-size:12.5px;
+    color:var(--accent);
+    white-space:pre-wrap;
+    min-height:88px;
+  }
+  .terminal .cursor{display:inline-block;width:7px;height:13px;background:var(--accent);margin-left:2px;animation:blink 1s step-end infinite;vertical-align:middle;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- module sections ---------- */
+  .module{
+    margin-bottom:46px;
+    scroll-margin-top:24px;
+  }
+  .module-head{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:14px;
+    border-bottom:1px solid var(--line); padding-bottom:10px;
+  }
+  .module-head .num{font-family:var(--mono); color:var(--accent); font-size:13px;}
+  .module-head h2{font-size:20px; margin:0; color:#fff; font-weight:600;}
+  .module-head .meta{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--muted); text-transform:uppercase;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-bottom:14px;
+  }
+  .card h3{margin:0 0 8px; font-size:14.5px; color:var(--accent); font-family:var(--mono); font-weight:500;}
+  .card p, .card li{font-size:14px; color:var(--text);}
+  .card ul{margin:6px 0 0; padding-left:18px;}
+  .card li{margin-bottom:6px;}
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
+  .pill{
+    font-family:var(--mono); font-size:11px; color:var(--amber);
+    border:1px solid var(--accent-dim); background:rgba(51,211,153,.06);
+    border-radius:99px; padding:3px 10px;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:6px; font-size:13.5px;}
+  th{
+    text-align:left; font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    color:var(--accent); border-bottom:1px solid var(--line); padding:8px 10px; letter-spacing:.04em;
+  }
+  td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--text); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+
+  /* ---------- quiz ---------- */
+  .quiz-section{
+    margin-top:70px;
+    border-top:2px dashed var(--line);
+    padding-top:46px;
+  }
+  .quiz-head{margin-bottom:28px;}
+  .quiz-head .tag{font-family:var(--mono); color:var(--amber); font-size:12px; letter-spacing:.1em; text-transform:uppercase;}
+  .quiz-head h2{font-family:var(--mono); font-size:26px; color:#fff; margin:10px 0 8px;}
+  .quiz-head p{color:var(--muted); font-size:14.5px; max-width:560px;}
+
+  .quiz-toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:8px;
+    padding:10px 16px; margin-bottom:24px; font-family:var(--mono); font-size:12px; color:var(--muted);
+  }
+  .quiz-toolbar #scoreLive{color:var(--accent);}
+
+  .qcard{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .qcard .qnum{
+    font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+  }
+  .qcard .qtext{font-size:15.5px; color:#fff; margin:6px 0 14px; font-weight:500;}
+  .options{display:flex; flex-direction:column; gap:8px;}
+  .opt{
+    display:flex; align-items:flex-start; gap:10px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:7px;
+    padding:10px 12px; cursor:pointer; font-size:14px; transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--accent-dim);}
+  .opt input{margin-top:3px; accent-color:var(--accent);}
+  .opt.correct{border-color:var(--accent); background:rgba(51,211,153,.08);}
+  .opt.incorrect{border-color:var(--red); background:rgba(255,107,107,.08);}
+  .opt.disabled{cursor:default;}
+  .feedback{
+    margin-top:12px; font-size:13px; font-family:var(--mono);
+    padding:10px 12px; border-radius:6px; display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.right{color:var(--accent); background:rgba(51,211,153,.08); border:1px solid var(--accent-dim);}
+  .feedback.wrong{color:var(--red); background:rgba(255,107,107,.08); border:1px solid rgba(255,107,107,.3);}
+
+  .quiz-results{
+    margin-top:30px; text-align:center; padding:36px 20px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:12px;
+    display:none;
+  }
+  .quiz-results.show{display:block;}
+  .quiz-results .score{font-family:var(--mono); font-size:44px; color:var(--accent); font-weight:700;}
+  .quiz-results .label{color:var(--muted); font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-top:6px;}
+  .quiz-results .verdict{margin-top:14px; font-size:15px; color:var(--text);}
+  .btn{
+    font-family:var(--mono); background:var(--accent); color:#04140d; border:none;
+    padding:11px 22px; border-radius:7px; font-size:13px; cursor:pointer; font-weight:600;
+    letter-spacing:.03em; margin-top:18px;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent; color:var(--accent); border:1px solid var(--accent-dim);}
+
+  footer{
+    margin-top:60px; padding-top:24px; border-top:1px solid var(--line);
+    font-family:var(--mono); font-size:11.5px; color:var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span>SECURITY_REVIEWER</div>
+    <div class="brand-sub">// CCGC cybersecurity study console</div>
+    <nav>
+      <div class="nav-group">Foundations</div>
+      <ul>
+        <li><a href="#m1"><span class="idx">01</span>Information Security</a></li>
+        <li><a href="#m2"><span class="idx">02</span>ISMS / ISO 27001</a></li>
+        <li><a href="#m3"><span class="idx">03</span>Threats &amp; Vulnerabilities</a></li>
+        <li><a href="#m4"><span class="idx">04</span>Security Policy</a></li>
+      </ul>
+      <div class="nav-group">Cisco Cybersecurity</div>
+      <ul>
+        <li><a href="#c1"><span class="idx">05</span>Cybersecurity World</a></li>
+        <li><a href="#c2"><span class="idx">06</span>The Cybersecurity Cube</a></li>
+        <li><a href="#c3"><span class="idx">07</span>Attacks &amp; Vulnerabilities</a></li>
+        <li><a href="#c4"><span class="idx">08</span>Protecting Secrets</a></li>
+        <li><a href="#c5"><span class="idx">09</span>Ensuring Integrity</a></li>
+        <li><a href="#c6"><span class="idx">10</span>The Five Nines</a></li>
+        <li><a href="#c7"><span class="idx">11</span>Protecting a Domain</a></li>
+        <li><a href="#c8"><span class="idx">12</span>Becoming a Specialist</a></li>
+      </ul>
+      <div class="nav-group">Check yourself</div>
+      <ul>
+        <li><a href="#quiz"><span class="idx">»</span>Take the quiz</a></li>
+      </ul>
+    </nav>
+    <div class="progress-card">
+      QUIZ STATUS
+      <div class="progress-bar"><div class="progress-fill" id="sideProgress"></div></div>
+      <div id="sideProgressText" style="margin-top:6px;">0 / 20 answered</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="tag">Reviewer + Self-Check // v1.0</span>
+      <h1>Comprehensive Cybersecurity Reviewer</h1>
+      <p>A condensed, console-style walkthrough of Information Security, ISMS, Security Policy Fundamentals, and Cisco Cybersecurity Chapters 1&ndash;8 — followed by a 20-question quiz to test what stuck.</p>
+      <div class="terminal" id="bootTerminal"></div>
+    </section>
+
+    <!-- MODULE 1 -->
+    <section class="module" id="m1">
+      <div class="module-head"><span class="num">01</span><h2>Understanding Information Security</h2><span class="meta">Module 1</span></div>
+
+      <div class="card">
+        <h3>core_definitions</h3>
+        <ul>
+          <li><strong>Information Security</strong> — protecting information/resources to minimize business risk and the consequences of losing crucial data.</li>
+          <li><strong>Risk</strong> — exposure to the chance of damage or loss. <strong>Threat</strong> — the source/means of an attack. <strong>Vulnerability</strong> — a weakness that exposes a system to harm.</li>
+          <li><strong>Intrusion</strong> — unauthorized access/breach. <strong>Attack</strong> — a technique exploiting a vulnerability without authorization. <strong>Controls</strong> — countermeasures against threats and risk.</li>
+          <li><strong>Goals:</strong> Prevention, Detection, Recovery.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>cia_triad</h3>
+        <table>
+          <tr><th>Principle</th><th>Definition</th><th>Methods</th></tr>
+          <tr><td>Confidentiality</td><td>Keep information/communications private</td><td>Encryption, Access Controls, Steganography</td></tr>
+          <tr><td>Integrity</td><td>Keep information accurate &amp; unmodified</td><td>Hashing, Digital Signatures, Certificates</td></tr>
+          <tr><td>Availability</td><td>Ensure continuous, authorized access</td><td>Redundancy, Patching</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>access_and_authentication</h3>
+        <ul>
+          <li><strong>AAA:</strong> Authentication (verify identity) → Authorization (assign rights) → Accounting/Auditing (track &amp; review activity).</li>
+          <li><strong>Access Control Models:</strong> MAC (clearance-based), DAC (owner/ID-based), RBAC (role-based), Rule-Based (condition rules).</li>
+          <li><strong>Authentication Methods:</strong> Password, Tokens, Biometrics, Geolocation, Multifactor.</li>
+        </ul>
+        <div class="pill-row">
+          <span class="pill">Something you are</span><span class="pill">Something you have</span>
+          <span class="pill">Something you know</span><span class="pill">Somewhere you are</span>
+          <span class="pill">Something you do</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>security_practices</h3>
+        <ul>
+          <li><strong>Implicit Deny</strong> — deny unless explicitly allowed.</li>
+          <li><strong>Least Privilege</strong> — minimum access necessary to do the job.</li>
+          <li><strong>Separation of Duties</strong> — no one person holds too much power.</li>
+          <li><strong>Job Rotation</strong> &amp; <strong>Mandatory Vacation</strong> — limit long-term unchecked access; enable audits.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MODULE 2 -->
+    <section class="module" id="m2">
+      <div class="module-head"><span class="num">02</span><h2>Information Security Management Systems</h2><span class="meta">Module 2</span></div>
+      <div class="card">
+        <h3>iso_27001</h3>
+        <ul>
+          <li><strong>ISO/IEC 27001 (2005):</strong> a model for establishing, implementing, operating, monitoring, reviewing, maintaining, and improving an <strong>ISMS</strong>.</li>
+          <li><strong>Process Approach (PDCA):</strong> Understand requirements → Implement controls → Monitor &amp; review → Continual improvement.</li>
+          <li><strong>ISMS:</strong> a systematic, organization-wide approach to managing sensitive information across people, process, and IT.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MODULE 3 -->
+    <section class="module" id="m3">
+      <div class="module-head"><span class="num">03</span><h2>Security Threats and Vulnerabilities</h2><span class="meta">Module 3</span></div>
+      <div class="card">
+        <h3>social_engineering</h3>
+        <ul>
+          <li><strong>Phishing</strong> — fraudulent messages impersonating a legitimate source.</li>
+          <li><strong>Pretexting</strong> — inventing a false scenario to obtain info.</li>
+          <li><strong>Baiting</strong> — leaving infected media for a victim to use.</li>
+          <li><strong>Tailgating</strong> — following an authorized person into a restricted area.</li>
+          <li><strong>Shoulder Surfing</strong> — observing credentials as they're entered.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MODULE 4 -->
+    <section class="module" id="m4">
+      <div class="module-head"><span class="num">04</span><h2>Security Policy Fundamentals</h2><span class="meta">Module 4</span></div>
+      <div class="card">
+        <h3>policy_hierarchy</h3>
+        <table>
+          <tr><th>Component</th><th>Definition</th></tr>
+          <tr><td>Security Policy</td><td>Objectives, rules of behavior, and system requirements</td></tr>
+          <tr><td>Standards</td><td>Maintain consistency; specify required technologies</td></tr>
+          <tr><td>Guidelines</td><td>Flexible, non-mandatory suggestions</td></tr>
+          <tr><td>Procedure Documents</td><td>Step-by-step implementation detail</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- CH 1 -->
+    <section class="module" id="c1">
+      <div class="module-head"><span class="num">05</span><h2>Cybersecurity World</h2><span class="meta">Chapter 1</span></div>
+      <div class="card">
+        <h3>specialists_vs_criminals</h3>
+        <ul>
+          <li><strong>Cybersecurity specialists</strong> detect vulnerabilities and respond to incidents.</li>
+          <li><strong>Criminals:</strong> hackers, hacktivists, state-sponsored actors, malicious insiders.</li>
+          <li><strong>Common threats:</strong> Malware, phishing, DoS, data breaches, insider threats.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CH 2 -->
+    <section class="module" id="c2">
+      <div class="module-head"><span class="num">06</span><h2>The Cybersecurity Cube</h2><span class="meta">Chapter 2</span></div>
+      <div class="card">
+        <h3>three_dimensions</h3>
+        <p>Security Principles (CIA) × Information States (transmission, storage, processing) × Security Measures (technology, policy/practice, people/education).</p>
+      </div>
+      <div class="card">
+        <h3>states_of_data</h3>
+        <table>
+          <tr><th>State</th><th>Description</th></tr>
+          <tr><td>At Rest</td><td>Stored data, not in use — DAS, RAID, NAS, SAN</td></tr>
+          <tr><td>In Transit</td><td>Moving between devices — sneaker net, wired, wireless</td></tr>
+          <tr><td>In Process</td><td>Being entered, modified, computed, or output</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- CH 3 -->
+    <section class="module" id="c3">
+      <div class="module-head"><span class="num">07</span><h2>Threats, Vulnerabilities, and Attacks</h2><span class="meta">Chapter 3</span></div>
+      <div class="card">
+        <h3>malware</h3>
+        <div class="pill-row">
+          <span class="pill">Virus</span><span class="pill">Worm</span><span class="pill">Trojan</span>
+          <span class="pill">Ransomware</span><span class="pill">Spyware</span><span class="pill">Rootkit</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>common_attacks</h3>
+        <ul>
+          <li><strong>DoS/DDoS</strong> — overwhelm network services.</li>
+          <li><strong>Spoofing</strong> — impersonate a trusted system.</li>
+          <li><strong>Man-in-the-Middle</strong> — intercept/alter communications.</li>
+          <li><strong>Zero-Day</strong> — exploits an unknown/undisclosed flaw.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CH 4 -->
+    <section class="module" id="c4">
+      <div class="module-head"><span class="num">08</span><h2>The Art of Protecting Secrets</h2><span class="meta">Chapter 4</span></div>
+      <div class="card">
+        <h3>cryptography</h3>
+        <ul>
+          <li><strong>Symmetric</strong> — single shared key, fast, bulk encryption.</li>
+          <li><strong>Asymmetric</strong> — public/private key pair; key exchange + signatures.</li>
+          <li><strong>Hashing</strong> — one-way digest used to verify integrity.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CH 5 -->
+    <section class="module" id="c5">
+      <div class="module-head"><span class="num">09</span><h2>The Art of Ensuring Integrity</h2><span class="meta">Chapter 5</span></div>
+      <div class="card">
+        <h3>integrity_tools</h3>
+        <ul>
+          <li><strong>Digital Signatures</strong> — verify sender authenticity + message integrity (asymmetric crypto).</li>
+          <li><strong>Certificates</strong> — issued by a CA, binding a public key to an identity (PKI).</li>
+          <li><strong>Database Integrity (ACID):</strong> Atomicity, Consistency, Isolation, Durability.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CH 6 -->
+    <section class="module" id="c6">
+      <div class="module-head"><span class="num">10</span><h2>The Five Nines Concept</h2><span class="meta">Chapter 6</span></div>
+      <div class="card">
+        <h3>availability</h3>
+        <p><strong>99.999% availability</strong> ≈ 5 minutes downtime/year — achieved via redundancy, fault tolerance, automatic failover.</p>
+      </div>
+      <div class="card">
+        <h3>incident_response</h3>
+        <p>Preparation → Identification → Containment → Eradication → Recovery → Lessons Learned.</p>
+      </div>
+      <div class="card">
+        <h3>disaster_recovery</h3>
+        <p><strong>RTO</strong> (Recovery Time Objective) and <strong>RPO</strong> (Recovery Point Objective) guide hot/warm/cold backup site planning.</p>
+      </div>
+    </section>
+
+    <!-- CH 7 -->
+    <section class="module" id="c7">
+      <div class="module-head"><span class="num">11</span><h2>Protecting a Cybersecurity Domain</h2><span class="meta">Chapter 7</span></div>
+      <div class="card">
+        <h3>hardening</h3>
+        <ul>
+          <li><strong>Server Hardening:</strong> disable unused services, least privilege, regular updates.</li>
+          <li><strong>Network Hardening:</strong> segmentation, VPNs, IDS/IPS.</li>
+          <li><strong>Physical Security:</strong> badge access, CCTV, locked server rooms.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CH 8 -->
+    <section class="module" id="c8">
+      <div class="module-head"><span class="num">12</span><h2>Becoming a Cybersecurity Specialist</h2><span class="meta">Chapter 8</span></div>
+      <div class="card">
+        <h3>ethics_and_law</h3>
+        <ul>
+          <li><strong>Ethics:</strong> the Computer Ethics Institute guides decisions beyond what's merely legal.</li>
+          <li><strong>Key laws:</strong> GLBA, SOX, PCI DSS, HIPAA, COPPA, FERPA, CFAA, ECPA.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>tools</h3>
+        <div class="pill-row">
+          <span class="pill">Vulnerability Scanners</span><span class="pill">Penetration Testing</span><span class="pill">Packet Analyzers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-section" id="quiz">
+      <div class="quiz-head">
+        <span class="tag">Self-check</span>
+        <h2>$ run final_check.exe</h2>
+        <p>20 questions pulled from every module above. Pick an answer to see instant feedback — your score tallies as you go.</p>
+      </div>
+
+      <div class="quiz-toolbar">
+        <span>ANSWERED: <span id="answeredCount">0</span> / <span id="totalCount">20</span></span>
+        <span>SCORE: <span id="scoreLive">0</span></span>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="quiz-results" id="quizResults">
+        <div class="score" id="finalScore">0 / 20</div>
+        <div class="label">final score</div>
+        <div class="verdict" id="finalVerdict"></div>
+        <button class="btn secondary" id="retryBtn">Retake quiz</button>
+      </div>
+    </section>
+
+    <footer>
+      Comprehensive Cybersecurity Reviewer — condensed reference + self-check. Built for quick exam review.
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// ---------------- boot terminal ----------------
+(function(){
+  const el = document.getElementById('bootTerminal');
+  const lines = [
+    '> initializing reviewer_console...',
+    '> loading modules: information_security, isms, threats, policy...',
+    '> loading chapters: 1-8 (cisco_cybersecurity)...',
+    '> status: READY. scroll to begin, or jump to a module on the left.'
+  ];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){
+    el.textContent = lines.join('\n');
+    return;
+  }
+  let li = 0, ci = 0, out = '';
+  function tick(){
+    if(li >= lines.length){ el.innerHTML = out + '<span class="cursor"></span>'; return; }
+    const line = lines[li];
+    if(ci <= line.length){
+      el.innerHTML = out + line.slice(0, ci) + '<span class="cursor"></span>';
+      ci++;
+      setTimeout(tick, 14);
+    } else {
+      out += line + '\n';
+      li++; ci = 0;
+      setTimeout(tick, 220);
+    }
+  }
+  tick();
+})();
+
+// ---------------- quiz data ----------------
+const QUESTIONS = [
+  {q:"Which CIA principle is primarily supported by hashing and digital signatures?", opts:["Confidentiality","Integrity","Availability","Authentication"], a:1, exp:"Integrity ensures information stays accurate and unmodified — verified via hashing and digital signatures."},
+  {q:"A weakness that leaves a system open to harm is best described as a:", opts:["Threat","Risk","Vulnerability","Control"], a:2, exp:"A vulnerability is the condition/weakness itself; a threat is the source/means of an attack against it."},
+  {q:"Which access control model grants access based on a user's assigned job role?", opts:["MAC","DAC","RBAC","Rule-Based"], a:2, exp:"Role-Based Access Control (RBAC) ties permissions to a user's role."},
+  {q:"\"Only allow what is explicitly permitted; deny everything else\" describes:", opts:["Least Privilege","Implicit Deny","Separation of Duties","Mandatory Vacation"], a:1, exp:"Implicit Deny denies anything not explicitly allowed."},
+  {q:"Which authentication factor category does a fingerprint scan belong to?", opts:["Something you know","Something you have","Something you are","Somewhere you are"], a:2, exp:"Biometrics like fingerprints fall under 'something you are.'"},
+  {q:"ISO/IEC 27001 primarily provides a model for:", opts:["Writing antivirus software","Establishing and improving an ISMS","Designing network hardware","Penetration testing tools"], a:1, exp:"ISO/IEC 27001 is the standard for establishing, operating, and improving an Information Security Management System."},
+  {q:"In the ISO Process Approach (PDCA-style cycle), what comes right after implementing controls?", opts:["Continual improvement","Monitoring & reviewing ISMS performance","Defining the security policy","Hiring security staff"], a:1, exp:"The cycle flows: understand requirements → implement controls → monitor & review → continual improvement."},
+  {q:"Leaving an infected USB drive for a victim to find and use is an example of:", opts:["Phishing","Baiting","Tailgating","Pretexting"], a:1, exp:"Baiting relies on a victim picking up and using infected planted media."},
+  {q:"Following an authorized employee through a secured door without your own badge is:", opts:["Shoulder surfing","Tailgating","Spoofing","Sniffing"], a:1, exp:"Tailgating is physically following someone into a restricted area."},
+  {q:"A formal, documented statement of rules governing IT resource use is a:", opts:["Procedure document","Guideline","Security policy","Standard"], a:2, exp:"The security policy is the foundational document; standards/guidelines/procedures support it."},
+  {q:"Which of these is NOT one of the three dimensions of the Cybersecurity Cube?", opts:["Security Principles","Information States","Security Measures","Network Topologies"], a:3, exp:"The three dimensions are Security Principles, Information States, and Security Measures — not topology."},
+  {q:"Data currently being computed or modified is in which state?", opts:["At rest","In transit","In process","In storage"], a:2, exp:"'In process' covers data during input, modification, computation, or output."},
+  {q:"Which malware type specifically disguises itself as legitimate software?", opts:["Worm","Trojan","Rootkit","Adware"], a:1, exp:"A Trojan appears legitimate but carries a hidden malicious payload."},
+  {q:"An attack that exploits a flaw unknown to the software vendor is called:", opts:["Man-in-the-Middle","Zero-Day","Spoofing","Keylogging"], a:1, exp:"Zero-Day attacks exploit vulnerabilities before they're known/patched."},
+  {q:"Which type of cryptography uses a single shared key for both encryption and decryption?", opts:["Asymmetric","Symmetric","Hashing","Steganography"], a:1, exp:"Symmetric cryptography uses one shared key and is fast, suited to bulk encryption."},
+  {q:"A digital certificate's main job is to:", opts:["Encrypt all network traffic","Bind a public key to a verified identity","Replace passwords entirely","Detect malware signatures"], a:1, exp:"Certificates, issued by a CA, bind a public key to an identity — the basis of PKI."},
+  {q:"In the ACID properties of database integrity, the 'A' in transactions guarantees that an operation either completes fully or not at all. This is:", opts:["Availability","Atomicity","Auditability","Authentication"], a:1, exp:"Atomicity ensures a transaction is all-or-nothing."},
+  {q:"99.999% (\"five nines\") availability translates to roughly how much downtime per year?", opts:["5 hours","5 minutes","5 days","50 minutes"], a:1, exp:"Five nines availability allows only about 5 minutes of downtime annually."},
+  {q:"In incident response, which phase comes immediately after Containment?", opts:["Identification","Preparation","Eradication","Lessons Learned"], a:2, exp:"Order: Preparation → Identification → Containment → Eradication → Recovery → Lessons Learned."},
+  {q:"Which U.S. law specifically protects health information?", opts:["FERPA","COPPA","HIPAA","SOX"], a:2, exp:"HIPAA protects health information; FERPA covers education records, COPPA covers children's online privacy."}
+];
+
+// ---------------- quiz render ----------------
+const container = document.getElementById('quizContainer');
+let answered = 0, score = 0;
+const state = new Array(QUESTIONS.length).fill(null);
+
+function renderQuiz(){
+  container.innerHTML = '';
+  QUESTIONS.forEach((item, qi) => {
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    card.innerHTML = `
+      <div class="qnum">Question ${qi+1} / ${QUESTIONS.length}</div>
+      <div class="qtext">${item.q}</div>
+      <div class="options" data-qi="${qi}"></div>
+      <div class="feedback" id="fb-${qi}"></div>
+    `;
+    const optWrap = card.querySelector('.options');
+    item.opts.forEach((optText, oi) => {
+      const label = document.createElement('label');
+      label.className = 'opt';
+      label.innerHTML = `<input type="radio" name="q${qi}" value="${oi}"> <span>${optText}</span>`;
+      label.addEventListener('click', () => handleAnswer(qi, oi, card));
+      optWrap.appendChild(label);
+    });
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function handleAnswer(qi, oi, card){
+  if(state[qi] !== null) return; // already answered
+  state[qi] = oi;
+  answered++;
+  const correct = oi === QUESTIONS[qi].a;
+  if(correct) score++;
+
+  const opts = card.querySelectorAll('.opt');
+  opts.forEach((opt, idx) => {
+    opt.classList.add('disabled');
+    opt.querySelector('input').disabled = true;
+    if(idx === QUESTIONS[qi].a) opt.classList.add('correct');
+    else if(idx === oi) opt.classList.add('incorrect');
+  });
+
+  const fb = card.querySelector('.feedback');
+  fb.classList.add('show', correct ? 'right' : 'wrong');
+  fb.textContent = (correct ? '✓ correct — ' : '✗ not quite — ') + QUESTIONS[qi].exp;
+
+  updateProgress();
+  if(answered === QUESTIONS.length) showResults();
+}
+
+function updateProgress(){
+  document.getElementById('answeredCount').textContent = answered;
+  document.getElementById('totalCount').textContent = QUESTIONS.length;
+  document.getElementById('scoreLive').textContent = score;
+  const pct = Math.round((answered / QUESTIONS.length) * 100);
+  document.getElementById('sideProgress').style.width = pct + '%';
+  document.getElementById('sideProgressText').textContent = `${answered} / ${QUESTIONS.length} answered`;
+}
+
+function showResults(){
+  const results = document.getElementById('quizResults');
+  results.classList.add('show');
+  document.getElementById('finalScore').textContent = `${score} / ${QUESTIONS.length}`;
+  const pct = score / QUESTIONS.length;
+  let verdict;
+  if(pct === 1) verdict = "Perfect run. You've internalized the whole reviewer.";
+  else if(pct >= 0.8) verdict = "Strong grasp — revisit the few you missed and you're exam-ready.";
+  else if(pct >= 0.6) verdict = "Solid foundation. Re-read the modules tied to your misses.";
+  else verdict = "Worth another pass through the modules before the exam.";
+  document.getElementById('finalVerdict').textContent = verdict;
+  results.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  answered = 0; score = 0;
+  state.fill(null);
+  document.getElementById('quizResults').classList.remove('show');
+  renderQuiz();
+  document.getElementById('quiz').scrollIntoView({behavior:'smooth'});
+});
+
+renderQuiz();
+</script>
+</body>
+</html>
